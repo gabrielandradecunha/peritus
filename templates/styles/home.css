@@ -1,0 +1,54 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+header{
+    padding: 1rem 3%;
+    width: 100%;
+    background: linear-gradient(90deg, #0285d1, #03a9f4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .logo{
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+header nav a{
+    text-decoration: none;
+    color: white;
+    margin-left: 2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+header nav a::after {
+    content: '';
+    display: block;
+    height: 2px;
+    width: 0;
+    background: white;
+    transition: width 0.3s;
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+}
+
+header nav a:hover::after {
+    width: 100%;
+}
+
+header nav a:hover {
+    color: #e0f7ff;
+}
