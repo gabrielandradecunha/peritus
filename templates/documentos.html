@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peritus | Documentos Técnicos</title>
+    <link rel="stylesheet" href="styles/home.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="stylesheet" href="styles/table.css">
+    <link rel="stylesheet" href="styles/form.css">
+</head>
+<body>
+    <header>
+        <div class="logo">Peritus</div>
+        <nav>
+            <a href="home.html">Home</a>
+            <a href="protocolos.html">Protocolos</a>
+            <a href="documentos.html" class="active">Documentos Técnicos</a>
+            <a href="usuarios.html">Usuários</a>
+            <a href="perfil.html">Perfil</a>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <!-- Tabs -->
+        <div class="tabs-header">
+            <div>
+                <h1>Documentos Técnicos</h1>
+                <p class="page-sub">Laudos gerados a partir de protocolos finalizados</p>
+            </div>
+            <div class="tab-btns">
+                <button class="tab-btn active" onclick="mudarTab('listar', this)">Laudos Emitidos</button>
+                <button class="tab-btn" onclick="mudarTab('gerar', this)">Gerar Laudo</button>
+            </div>
+        </div>
+
+        <!-- Tab: Listar -->
+        <div id="tabListar">
+            <div class="filters-bar">
+                <div class="search-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" placeholder="Buscar laudo...">
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nº Laudo</th>
+                            <th>Protocolo</th>
+                            <th>Tipo de Perícia</th>
+                            <th>Perito</th>
+                            <th>Data de Emissão</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>LAU-2026-018</strong></td>
+                            <td>#2026-040</td>
+                            <td>Análise Grafoscópica</td>
+                            <td>José da Silva</td>
+                            <td>10/05/2026</td>
+                            <td class="actions-cell">
+                                <button class="btn-action btn-ver" onclick="verLaudo()">Visualizar</button>
+                                <button class="btn-action btn-atribuir">Download</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>LAU-2026-017</strong></td>
+                            <td>#2026-039</td>
+                            <td>Exame de Local de Incêndio</td>
+                            <td>José da Silva</td>
+                            <td>09/05/2026</td>
+                            <td class="actions-cell">
+                                <button class="btn-action btn-ver" onclick="verLaudo()">Visualizar</button>
+                                <button class="btn-action btn-atribuir">Download</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>LAU-2026-015</strong></td>
+                            <td>#2026-037</td>
+                            <td>Análise Balística</td>
+                            <td>Ana Pereira</td>
+                            <td>03/05/2026</td>
+                            <td class="actions-cell">
+                                <button class="btn-action btn-ver" onclick="verLaudo()">Visualizar</button>
+                                <button class="btn-action btn-atribuir">Download</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Gerar Laudo -->
+        <div id="tabGerar" style="display:none">
+            <div class="form-card">
+                <div id="laudoAlert" class="alert" style="display:none"></div>
+                <form id="formLaudo" class="form" novalidate>
+                    <div class="form-section">
+                        <h3 class="form-section-title">Protocolo de Referência</h3>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="protRef">Protocolo <span class="req">*</span></label>
+                                <select id="protRef" required>
+                                    <option value="">Selecione o protocolo</option>
+                                    <option value="42">#2026-042 — Análise de documento suspeito</option>
+                                    <option value="41">#2026-041 — Perícia em equipamento eletrônico</option>
+                                </select>
+                                <span class="field-error" id="protRefErr"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="dataLaudo">Data de Emissão <span class="req">*</span></label>
+                                <input type="date" id="dataLaudo" required>
+                                <span class="field-error" id="dataLaudoErr"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="form-section-title">Conteúdo do Laudo</h3>
+                        <div class="form-group">
+                            <label for="objetivo">Objetivo da Perícia <span class="req">*</span></label>
+                            <textarea id="objetivo" rows="3" placeholder="Descreva o objetivo desta perícia técnica..." required></textarea>
+                            <span class="field-error" id="objErr"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="metodologia">Metodologia Aplicada <span class="req">*</span></label>
+                            <textarea id="metodologia" rows="3" placeholder="Descreva os métodos e procedimentos utilizados..." required></textarea>
+                            <span class="field-error" id="metErr"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="analise">Análise e Resultados <span class="req">*</span></label>
+                            <textarea id="analise" rows="5" placeholder="Descreva detalhadamente os resultados encontrados..." required></textarea>
+                            <span class="field-error" id="analErr"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="conclusao">Conclusão <span class="req">*</span></label>
+                            <textarea id="conclusao" rows="4" placeholder="Apresente as conclusões técnicas da perícia..." required></textarea>
+                            <span class="field-error" id="concErr"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="mudarTab('listar', document.querySelector('.tab-btn'))">Cancelar</button>
+                        <button type="submit" class="btn-primary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                            Gerar Laudo Técnico
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Visualizar Laudo -->
+    <div id="modalLaudo" class="modal-overlay" style="display:none">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3>Laudo Técnico — LAU-2026-018</h3>
+                <button onclick="fecharModal('modalLaudo')" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body laudo-preview">
+                <div class="laudo-header-doc">
+                    <strong>Instituto de Perícias de Mato Grosso</strong><br>
+                    <span>LAUDO TÉCNICO Nº LAU-2026-018</span>
+                </div>
+                <div class="laudo-meta">
+                    <p><strong>Protocolo:</strong> #2026-040</p>
+                    <p><strong>Tipo:</strong> Análise Grafoscópica</p>
+                    <p><strong>Perito Responsável:</strong> José da Silva</p>
+                    <p><strong>Data de Emissão:</strong> 10/05/2026</p>
+                </div>
+                <h4>1. Objetivo da Perícia</h4>
+                <p>Verificar a autenticidade da assinatura presente no documento apresentado como prova no processo.</p>
+                <h4>2. Metodologia</h4>
+                <p>Aplicação de técnicas grafoscópicas comparativas com documentos padrão coletados do suposto signatário.</p>
+                <h4>3. Análise e Resultados</h4>
+                <p>A análise revelou divergências significativas no traçado, pressão e ângulo das grafias comparadas, indicando possível falsificação.</p>
+                <h4>4. Conclusão</h4>
+                <p>Com base nos elementos técnicos analisados, <strong>conclui-se que a assinatura não pertence ao suposto signatário</strong>.</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharModal('modalLaudo')" class="btn-secondary-sm">Fechar</button>
+                <button class="btn-primary-sm">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function mudarTab(tab, btn) {
+            document.getElementById('tabListar').style.display = tab === 'listar' ? 'block' : 'none';
+            document.getElementById('tabGerar').style.display = tab === 'gerar' ? 'block' : 'none';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function verLaudo() { document.getElementById('modalLaudo').style.display = 'flex'; }
+        function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('dataLaudo').value = hoje;
+
+        document.getElementById('formLaudo').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const campos = [
+                {id:'protRef', err:'protRefErr'},
+                {id:'dataLaudo', err:'dataLaudoErr'},
+                {id:'objetivo', err:'objErr'},
+                {id:'metodologia', err:'metErr'},
+                {id:'analise', err:'analErr'},
+                {id:'conclusao', err:'concErr'},
+            ];
+            let valid = true;
+            campos.forEach(c => {
+                const el = document.getElementById(c.id);
+                const err = document.getElementById(c.err);
+                if (!el.value.trim()) { err.textContent = 'Campo obrigatório.'; valid = false; }
+                else err.textContent = '';
+            });
+            if (!valid) return;
+            const alert = document.getElementById('laudoAlert');
+            alert.className = 'alert alert-success';
+            alert.textContent = '✓ Laudo gerado com sucesso!';
+            alert.style.display = 'block';
+            setTimeout(() => { alert.style.display='none'; mudarTab('listar', document.querySelector('.tab-btn')); }, 2000);
+        });
+    </script>
+</body>
+</html>

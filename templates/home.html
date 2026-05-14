@@ -1,21 +1,145 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peritus | Home</title>
+    <title>Peritus | Dashboard</title>
     <link rel="stylesheet" href="styles/home.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
 </head>
 <body>
-    <!--Header-->
     <header>
         <div class="logo">Peritus</div>
         <nav>
-            <a href="">Protocolos</a>
-            <a href="">Documentos Técnicos</a>
-            <a href="">Usuarios</a>
-            <a href="">Perfil</a>
+            <a href="honme.html">Home</a>
+            <a href="protocolos.html">Protocolos</a>
+            <a href="documentos.html">Documentos Técnicos</a>
+            <a href="usuarios.html">Usuários</a>
+            <a href="perfil.html">Perfil</a>
         </nav>
     </header>
+
+    <main class="dashboard">
+        <div class="dash-welcome">
+            <div>
+                <h1>Bem-vindo, <span id="nomeUsuario">Gabriel</span></h1>
+                <p class="dash-role">Administrador · <span id="dataHoje"></span></p>
+            </div>
+        </div>
+
+        <section class="cards-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-blue">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-3-3v6M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Protocolos Abertos</span>
+                    <span class="stat-value">12</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-orange">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Em Trâmite</span>
+                    <span class="stat-value">7</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Finalizados</span>
+                    <span class="stat-value">38</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-purple">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Usuários Ativos</span>
+                    <span class="stat-value">5</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="dash-bottom">
+            <div class="recent-table-wrapper">
+                <div class="section-header">
+                    <h2>Protocolos Recentes</h2>
+                    <a href="protocolos.html" class="ver-todos">Ver todos →</a>
+                </div>
+                <table class="recent-table">
+                    <thead>
+                        <tr>
+                            <th>Nº Protocolo</th>
+                            <th>Solicitante</th>
+                            <th>Perito</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>#2026-042</strong></td>
+                            <td>João da Silva</td>
+                            <td>José da Silva</td>
+                            <td><span class="badge badge-tramite">Em Trâmite</span></td>
+                            <td>12/05/2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>#2026-041</strong></td>
+                            <td>Maria Souza</td>
+                            <td>—</td>
+                            <td><span class="badge badge-aberto">Aberto</span></td>
+                            <td>11/05/2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>#2026-040</strong></td>
+                            <td>Carlos Lima</td>
+                            <td>José da Silva</td>
+                            <td><span class="badge badge-finalizado">Finalizado</span></td>
+                            <td>10/05/2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>#2026-039</strong></td>
+                            <td>Ana Paula</td>
+                            <td>José da Silva</td>
+                            <td><span class="badge badge-finalizado">Finalizado</span></td>
+                            <td>09/05/2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="quick-actions">
+                <div class="section-header">
+                    <h2>Ações Rápidas</h2>
+                </div>
+                <div class="action-list">
+                    <a href="protocolo-novo.html" class="action-btn action-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                        Novo Protocolo
+                    </a>
+                    <a href="documentos.html" class="action-btn action-secondary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                        Gerar Laudo
+                    </a>
+                    <a href="usuarios.html" class="action-btn action-secondary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 20a6 6 0 0 1 12 0v1H3v-1z"/></svg>
+                        Cadastrar Usuário
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const hoje = new Date();
+        document.getElementById('dataHoje').textContent = hoje.toLocaleDateString('pt-BR', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+    </script>
 </body>
 </html>

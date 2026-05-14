@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peritus | Novo Protocolo</title>
+    <link rel="stylesheet" href="styles/home.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="stylesheet" href="styles/form.css">
+</head>
+<body>
+    <header>
+        <div class="logo">Peritus</div>
+        <nav>
+            <a href="protocolos.html" class="active">Protocolos</a>
+            <a href="documentos.html">Documentos Técnicos</a>
+            <a href="usuarios.html">Usuários</a>
+            <a href="perfil.html">Perfil</a>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <div class="page-header">
+            <div>
+                <a href="protocolos.html" class="breadcrumb">← Protocolos</a>
+                <h1>Novo Protocolo de Perícia</h1>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div id="formAlert" class="alert" style="display:none"></div>
+
+            <form id="formProtocolo" class="form" novalidate>
+                <div class="form-section">
+                    <h3 class="form-section-title">Identificação</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="tipoPericia">Tipo de Perícia <span class="req">*</span></label>
+                            <select id="tipoPericia" name="tipoPericia" required>
+                                <option value="">Selecione o tipo</option>
+                                <option>Análise Documental</option>
+                                <option>Análise Grafoscópica</option>
+                                <option>Perícia em Informática</option>
+                                <option>Análise Balística</option>
+                                <option>Exame de Local de Incêndio</option>
+                                <option>Outros</option>
+                            </select>
+                            <span class="field-error" id="tipoErr"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="prioridade">Prioridade <span class="req">*</span></label>
+                            <select id="prioridade" name="prioridade" required>
+                                <option value="">Selecione</option>
+                                <option value="normal">Normal</option>
+                                <option value="urgente">Urgente</option>
+                                <option value="muito_urgente">Muito Urgente</option>
+                            </select>
+                            <span class="field-error" id="priorErr"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descricao">Descrição / Objeto da Perícia <span class="req">*</span></label>
+                        <textarea id="descricao" name="descricao" rows="4" placeholder="Descreva detalhadamente o objeto e a finalidade da perícia solicitada..." required></textarea>
+                        <span class="field-error" id="descErr"></span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Solicitante</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="solicitante">Nome do Solicitante <span class="req">*</span></label>
+                            <input type="text" id="solicitante" name="solicitante" placeholder="Nome completo" required>
+                            <span class="field-error" id="solErr"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="orgao">Órgão / Instituição</label>
+                            <input type="text" id="orgao" name="orgao" placeholder="Ex: Delegacia Regional de Cuiabá">
+                        </div>
+                        <div class="form-group">
+                            <label for="contato">Contato (Telefone)</label>
+                            <input type="text" id="contato" name="contato" placeholder="(65) 9 0000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label for="emailSol">E-mail</label>
+                            <input type="email" id="emailSol" name="emailSol" placeholder="email@orgao.gov.br">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Atribuição (opcional)</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="perito">Perito Responsável</label>
+                            <select id="perito" name="perito">
+                                <option value="">Atribuir depois</option>
+                                <option value="jose">José da Silva</option>
+                                <option value="ana">Ana Pereira</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="prazo">Prazo Estimado</label>
+                            <input type="date" id="prazo" name="prazo">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Observações</h3>
+                    <div class="form-group">
+                        <label for="obs">Observações Adicionais</label>
+                        <textarea id="obs" name="obs" rows="3" placeholder="Informações complementares relevantes para a realização da perícia..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="protocolos.html" class="btn-cancel">Cancelar</a>
+                    <button type="submit" class="btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+                        Abrir Protocolo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('formProtocolo').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let valid = true;
+
+            ['tipoPericia','prioridade','descricao','solicitante'].forEach(id => {
+                const el = document.getElementById(id);
+                const errId = {tipoPericia:'tipoErr', prioridade:'priorErr', descricao:'descErr', solicitante:'solErr'}[id];
+                const err = document.getElementById(errId);
+                if (!el.value.trim()) { err.textContent = 'Campo obrigatório.'; valid = false; }
+                else err.textContent = '';
+            });
+
+            if (!valid) return;
+
+            const alert = document.getElementById('formAlert');
+            alert.className = 'alert alert-success';
+            alert.textContent = '✓ Protocolo aberto com sucesso! Redirecionando...';
+            alert.style.display = 'block';
+            setTimeout(() => window.location.href = 'protocolos.html', 1800);
+        });
+
+        document.getElementById('contato').addEventListener('input', function() {
+            let v = this.value.replace(/\D/g,'');
+            if (v.length <= 11) v = v.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, '($1) $2 $3-$4');
+            this.value = v;
+        });
+    </script>
+</body>
+</html>

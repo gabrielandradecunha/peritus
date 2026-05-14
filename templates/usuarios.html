@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peritus | Usuários</title>
+    <link rel="stylesheet" href="styles/home.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="stylesheet" href="styles/table.css">
+    <link rel="stylesheet" href="styles/form.css">
+</head>
+<body>
+    <header>
+        <div class="logo">Peritus</div>
+        <nav>
+            <a href="home.html">Home</a>
+            <a href="protocolos.html">Protocolos</a>
+            <a href="documentos.html">Documentos Técnicos</a>
+            <a href="usuarios.html" class="active">Usuários</a>
+            <a href="perfil.html">Perfil</a>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <div class="page-header">
+            <div>
+                <h1>Usuários</h1>
+                <p class="page-sub">Cadastro e gerenciamento de usuários do sistema</p>
+            </div>
+            <button class="btn-primary" onclick="abrirModal('modalNovoUsuario')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 20a6 6 0 0 1 12 0v1H3v-1z"/></svg>
+                Cadastrar Usuário
+            </button>
+        </div>
+
+        <div class="filters-bar">
+            <div class="search-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="searchUser" placeholder="Buscar por nome ou e-mail..." oninput="filtrarUsuarios()">
+            </div>
+            <select id="filtroPerfil" onchange="filtrarUsuarios()">
+                <option value="">Todos os perfis</option>
+                <option value="ADMINISTRADOR">Administrador</option>
+                <option value="PERITO">Perito</option>
+                <option value="SOLICITANTE">Solicitante</option>
+            </select>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Perfil</th>
+                        <th>Status</th>
+                        <th>Cadastrado em</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyUsuarios"></tbody>
+            </table>
+            <div id="emptyUsuarios" class="empty-state" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
+                <p>Nenhum usuário encontrado.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Novo/Editar Usuário -->
+    <div id="modalNovoUsuario" class="modal-overlay" style="display:none">
+        <div class="modal modal-medium">
+            <div class="modal-header">
+                <h3 id="modalTituloUsuario">Cadastrar Usuário</h3>
+                <button onclick="fecharModal('modalNovoUsuario')" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="usuarioAlert" class="alert" style="display:none"></div>
+                <form id="formUsuario" class="form" novalidate>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="nomeUser">Nome Completo <span class="req">*</span></label>
+                            <input type="text" id="nomeUser" placeholder="Nome do usuário" required>
+                            <span class="field-error" id="nomeUserErr"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="perfilUser">Perfil <span class="req">*</span></label>
+                            <select id="perfilUser" required>
+                                <option value="">Selecione</option>
+                                <option value="ADMINISTRADOR">Administrador</option>
+                                <option value="PERITO">Perito</option>
+                                <option value="SOLICITANTE">Solicitante</option>
+                            </select>
+                            <span class="field-error" id="perfilUserErr"></span>
+                        </div>
+                        <div class="form-group" style="grid-column: 1/-1">
+                            <label for="emailUser">E-mail <span class="req">*</span></label>
+                            <input type="email" id="emailUser" placeholder="email@dominio.com" required>
+                            <span class="field-error" id="emailUserErr"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="senhaUser">Senha <span class="req">*</span></label>
+                            <input type="password" id="senhaUser" placeholder="Mínimo 8 caracteres" required>
+                            <span class="field-error" id="senhaUserErr"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmarSenha">Confirmar Senha <span class="req">*</span></label>
+                            <input type="password" id="confirmarSenha" placeholder="Repita a senha" required>
+                            <span class="field-error" id="confirmarSenhaErr"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharModal('modalNovoUsuario')" class="btn-secondary-sm">Cancelar</button>
+                <button onclick="salvarUsuario()" class="btn-primary-sm">Salvar Usuário</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Desativar -->
+    <div id="modalDesativar" class="modal-overlay" style="display:none">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Desativar Usuário</h3>
+                <button onclick="fecharModal('modalDesativar')" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja desativar o usuário <strong id="nomeDesativar"></strong>?</p>
+                <p style="color:#666; font-size:.9rem; margin-top:.5rem">O usuário perderá acesso ao sistema.</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharModal('modalDesativar')" class="btn-secondary-sm">Cancelar</button>
+                <button onclick="confirmarDesativar()" class="btn-danger-sm">Desativar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let usuarios = [
+            { nome: 'Gabriel Andrade', email: 'gabriel@peritus.com', perfil: 'ADMINISTRADOR', status: 'Ativo', data: '01/04/2026' },
+            { nome: 'José da Silva', email: 'jose@peritus.com', perfil: 'PERITO', status: 'Ativo', data: '01/04/2026' },
+            { nome: 'Ana Pereira', email: 'ana@peritus.com', perfil: 'PERITO', status: 'Ativo', data: '05/04/2026' },
+            { nome: 'João da Silva', email: 'joao@peritus.com', perfil: 'SOLICITANTE', status: 'Ativo', data: '10/04/2026' },
+            { nome: 'Maria Souza', email: 'maria@peritus.com', perfil: 'SOLICITANTE', status: 'Inativo', data: '15/04/2026' },
+        ];
+
+        let usuarioIdx = null;
+
+        function perfilBadge(p) {
+            if (p === 'ADMINISTRADOR') return 'badge-admin';
+            if (p === 'PERITO') return 'badge-perito';
+            return 'badge-solicitante';
+        }
+
+        function renderUsuarios(lista) {
+            const tbody = document.getElementById('tbodyUsuarios');
+            const empty = document.getElementById('emptyUsuarios');
+            tbody.innerHTML = '';
+            if (!lista.length) { empty.style.display = 'flex'; return; }
+            empty.style.display = 'none';
+            lista.forEach((u, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${u.nome}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="badge ${perfilBadge(u.perfil)}">${u.perfil}</span></td>
+                    <td><span class="badge ${u.status === 'Ativo' ? 'badge-finalizado' : 'badge-inativo'}">${u.status}</span></td>
+                    <td>${u.data}</td>
+                    <td class="actions-cell">
+                        <button class="btn-action btn-ver" onclick="editarUsuario(${i})">Editar</button>
+                        ${u.status === 'Ativo' ? `<button class="btn-action btn-finalizar" onclick="abrirDesativar(${i})">Desativar</button>` : `<button class="btn-action btn-atribuir" onclick="reativar(${i})">Reativar</button>`}
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filtrarUsuarios() {
+            const busca = document.getElementById('searchUser').value.toLowerCase();
+            const perfil = document.getElementById('filtroPerfil').value;
+            renderUsuarios(usuarios.filter(u =>
+                (u.nome.toLowerCase().includes(busca) || u.email.toLowerCase().includes(busca)) &&
+                (!perfil || u.perfil === perfil)
+            ));
+        }
+
+        function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function salvarUsuario() {
+            const nome = document.getElementById('nomeUser').value.trim();
+            const perfil = document.getElementById('perfilUser').value;
+            const email = document.getElementById('emailUser').value.trim();
+            const senha = document.getElementById('senhaUser').value;
+            const confirmar = document.getElementById('confirmarSenha').value;
+            let valid = true;
+
+            if (!nome) { document.getElementById('nomeUserErr').textContent = 'Campo obrigatório.'; valid = false; } else document.getElementById('nomeUserErr').textContent = '';
+            if (!perfil) { document.getElementById('perfilUserErr').textContent = 'Campo obrigatório.'; valid = false; } else document.getElementById('perfilUserErr').textContent = '';
+            if (!email) { document.getElementById('emailUserErr').textContent = 'Campo obrigatório.'; valid = false; } else document.getElementById('emailUserErr').textContent = '';
+            if (senha.length < 8) { document.getElementById('senhaUserErr').textContent = 'Mínimo 8 caracteres.'; valid = false; } else document.getElementById('senhaUserErr').textContent = '';
+            if (senha !== confirmar) { document.getElementById('confirmarSenhaErr').textContent = 'Senhas não coincidem.'; valid = false; } else document.getElementById('confirmarSenhaErr').textContent = '';
+
+            if (!valid) return;
+
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            if (usuarioIdx !== null) {
+                usuarios[usuarioIdx] = { ...usuarios[usuarioIdx], nome, email, perfil };
+                usuarioIdx = null;
+            } else {
+                usuarios.push({ nome, email, perfil, status: 'Ativo', data: hoje });
+            }
+            fecharModal('modalNovoUsuario');
+            renderUsuarios(usuarios);
+            document.getElementById('formUsuario').reset();
+        }
+
+        function editarUsuario(i) {
+            usuarioIdx = i;
+            const u = usuarios[i];
+            document.getElementById('modalTituloUsuario').textContent = 'Editar Usuário';
+            document.getElementById('nomeUser').value = u.nome;
+            document.getElementById('emailUser').value = u.email;
+            document.getElementById('perfilUser').value = u.perfil;
+            abrirModal('modalNovoUsuario');
+        }
+
+        function abrirDesativar(i) {
+            usuarioIdx = i;
+            document.getElementById('nomeDesativar').textContent = usuarios[i].nome;
+            abrirModal('modalDesativar');
+        }
+
+        function confirmarDesativar() {
+            usuarios[usuarioIdx].status = 'Inativo';
+            fecharModal('modalDesativar');
+            renderUsuarios(usuarios);
+        }
+
+        function reativar(i) {
+            usuarios[i].status = 'Ativo';
+            renderUsuarios(usuarios);
+        }
+
+        renderUsuarios(usuarios);
+    </script>
+</body>
+</html>
