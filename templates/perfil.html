@@ -1,324 +1,199 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peritus | Perfil</title>
-
-    <link rel="stylesheet" href="styles/home.css">
-    <link rel="stylesheet" href="styles/dashboard.css">
-    <link rel="stylesheet" href="styles/form.css">
-    <link rel="stylesheet" href="styles/perfil.css">
-</head> 
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'form.css' %}">
+    <link rel="stylesheet" href="{% static 'perfil.css' %}">
+</head>
 <body>
-
     <header>
         <div class="logo">Peritus</div>
-
         <nav>
-            <a href="home.html">Home</a>
-            <a href="protocolos.html">Protocolos</a>
-            <a href="documentos.html">Documentos Técnicos</a>
-            <a href="usuarios.html">Usuários</a>
-            <a href="perfil.html" class="active">Perfil</a>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'protocolos' %}">Protocolos</a>
+            <a href="{% url 'documentos' %}">Documentos Técnicos</a>
+            <a href="{% url 'usuarios' %}">Usuários</a>
+            <a href="{% url 'perfil' %}" class="active">Perfil</a>
+            <a href="{% url 'logout' %}">Sair</a>
         </nav>
     </header>
 
     <main class="dashboard">
 
+        {% if sucesso %}<div class="alert alert-success">✓ {{ sucesso }}</div>{% endif %}
+        {% if erro %}<div class="alert alert-error">{{ erro }}</div>{% endif %}
+
         <div class="perfil-header">
             <div class="perfil-capa"></div>
-
             <div class="perfil-info">
                 <div class="perfil-avatar">
-                    GA
+                    {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
                 </div>
-
                 <div class="perfil-dados">
-                    <h1>Gabriel Andrade</h1>
-
+                    <h1>{{ request.user.get_full_name|default:request.user.email }}</h1>
                     <div class="perfil-meta">
-                        <span class="badge badge-admin">Administrador</span>
+                        {% if request.user.perfil == 'ADM' %}<span class="badge badge-admin">Administrador</span>
+                        {% elif request.user.perfil == 'PER' %}<span class="badge badge-perito">Perito</span>
+                        {% else %}<span class="badge badge-solicitante">Solicitante</span>
+                        {% endif %}
                         <span>Instituto de Perícias</span>
                     </div>
-
-                    <p class="perfil-email">
-                        gabriel@peritus.com
-                    </p>
+                    <p class="perfil-email">{{ request.user.email }}</p>
                 </div>
-
-            <button class="btn-primary" onclick="abrirModalPerfil()">
-                Editar Perfil
-            </button>
+                <button class="btn-primary" onclick="abrirModal('modalPerfil')">Editar Perfil</button>
             </div>
         </div>
 
         <section class="perfil-grid">
 
-            <!-- LADO ESQUERDO -->
+            <!-- ESQUERDO -->
             <div class="perfil-left">
 
                 <div class="perfil-card">
-                    <div class="section-header">
-                        <h2>Informações Pessoais</h2>
-                    </div>
-
+                    <div class="section-header"><h2>Informações Pessoais</h2></div>
                     <div class="info-list">
-
                         <div class="info-item">
                             <span class="info-label">Nome Completo</span>
-                            <span class="info-value">Gabriel Andrade</span>
+                            <span class="info-value">{{ request.user.get_full_name|default:"—" }}</span>
                         </div>
-
                         <div class="info-item">
                             <span class="info-label">E-mail</span>
-                            <span class="info-value">gabriel@peritus.com</span>
+                            <span class="info-value">{{ request.user.email }}</span>
                         </div>
-
                         <div class="info-item">
-                            <span class="info-label">Telefone</span>
-                            <span class="info-value">(65) 9 9999-9999</span>
+                            <span class="info-label">Perfil</span>
+                            <span class="info-value">{{ request.user.get_perfil_display }}</span>
                         </div>
-
                         <div class="info-item">
-                            <span class="info-label">Cargo</span>
-                            <span class="info-value">Administrador do Sistema</span>
+                            <span class="info-label">Membro desde</span>
+                            <span class="info-value">{{ request.user.date_joined|date:"d/m/Y" }}</span>
                         </div>
-
-                        <div class="info-item">
-                            <span class="info-label">Localização</span>
-                            <span class="info-value">Cuiabá - MT</span>
-                        </div>
-
                     </div>
                 </div>
 
                 <div class="perfil-card">
-                    <div class="section-header">
-                        <h2>Segurança</h2>
-                    </div>
-
-                    <form class="form">
-
+                    <div class="section-header"><h2>Segurança</h2></div>
+                    <form method="post" action="{% url 'alterarSenha' %}" class="form">
+                        {% csrf_token %}
                         <div class="form-group">
                             <label>Senha Atual</label>
-                            <input type="password" placeholder="Digite sua senha atual">
+                            <input type="password" name="senha_atual" placeholder="Digite sua senha atual" required>
                         </div>
-
                         <div class="form-group">
                             <label>Nova Senha</label>
-                            <input type="password" placeholder="Digite a nova senha">
+                            <input type="password" name="nova_senha" placeholder="Mínimo 8 caracteres" required>
                         </div>
-
                         <div class="form-group">
                             <label>Confirmar Nova Senha</label>
-                            <input type="password" placeholder="Repita a nova senha">
+                            <input type="password" name="confirmar_senha" placeholder="Repita a nova senha" required>
                         </div>
-
-                        <button type="submit" class="btn-primary">
-                            Atualizar Senha
-                        </button>
-
+                        <button type="submit" class="btn-primary">Atualizar Senha</button>
                     </form>
                 </div>
 
             </div>
 
-            <!-- LADO DIREITO -->
+            <!-- DIREITO -->
             <div class="perfil-right">
 
                 <div class="perfil-card perfil-stats">
-
-                    <div class="section-header">
-                        <h2>Resumo</h2>
-                    </div>
-
+                    <div class="section-header"><h2>Resumo</h2></div>
                     <div class="perfil-stat">
                         <span>Protocolos Criados</span>
-                        <strong>58</strong>
+                        <strong>{{ total_protocolos }}</strong>
                     </div>
-
                     <div class="perfil-stat">
                         <span>Laudos Emitidos</span>
-                        <strong>24</strong>
+                        <strong>{{ total_laudos }}</strong>
                     </div>
-
+                    {% if request.user.perfil == 'ADM' %}
                     <div class="perfil-stat">
                         <span>Usuários Gerenciados</span>
-                        <strong>12</strong>
+                        <strong>{{ total_usuarios }}</strong>
                     </div>
-
+                    {% endif %}
                     <div class="perfil-stat">
-                        <span>Último Acesso</span>
-                        <strong>Hoje às 14:32</strong>
+                        <span>Membro desde</span>
+                        <strong>{{ request.user.date_joined|date:"d/m/Y" }}</strong>
                     </div>
-
                 </div>
 
                 <div class="perfil-card">
-
-                    <div class="section-header">
-                        <h2>Atividade Recente</h2>
-                    </div>
-
+                    <div class="section-header"><h2>Atividade Recente</h2></div>
                     <div class="timeline">
-
+                        {% for p in protocolos_recentes %}
                         <div class="timeline-item">
                             <div class="timeline-dot"></div>
-
                             <div>
-                                <strong>Protocolo #2026-042 criado</strong>
-                                <p>Hoje às 10:22</p>
+                                <strong>Protocolo #{{ p.pk }} criado</strong>
+                                <p>{{ p.criado_em|date:"d/m/Y \à\s H:i" }}</p>
                             </div>
                         </div>
-
+                        {% endfor %}
+                        {% for l in laudos_recentes %}
                         <div class="timeline-item">
                             <div class="timeline-dot"></div>
-
                             <div>
-                                <strong>Usuário Ana Pereira editado</strong>
-                                <p>Ontem às 18:04</p>
+                                <strong>Laudo LAU-{{ l.pk|stringformat:"05d" }} emitido</strong>
+                                <p>{{ l.gerado_em|date:"d/m/Y \à\s H:i" }}</p>
                             </div>
                         </div>
-
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-
-                            <div>
-                                <strong>Laudo LAU-2026-018 emitido</strong>
-                                <p>12/05/2026</p>
-                            </div>
-                        </div>
-
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-
-                            <div>
-                                <strong>Login realizado</strong>
-                                <p>12/05/2026</p>
-                            </div>
-                        </div>
-
+                        {% endfor %}
+                        {% if not protocolos_recentes and not laudos_recentes %}
+                        <p style="color:#999">Nenhuma atividade recente.</p>
+                        {% endif %}
                     </div>
-
                 </div>
 
             </div>
-
         </section>
-
     </main>
-<!-- MODAL EDITAR PERFIL -->
-<div id="modalPerfil" class="modal-overlay" style="display:none">
 
-    <div class="modal modal-medium">
-
-        <div class="modal-header">
-            <h3>Editar Perfil</h3>
-
-            <button class="btn-close" onclick="fecharModalPerfil()">
-                &times;
-            </button>
-        </div>
-
-        <div class="modal-body">
-
-            <form id="formPerfil" class="form">
-
-                <div class="form-grid-2">
-
-                    <div class="form-group">
-                        <label>Nome Completo</label>
-                        <input type="text" id="editNome" value="Gabriel Andrade">
+    <!-- Modal Editar Perfil -->
+    <div id="modalPerfil" class="modal-overlay" style="display:none">
+        <div class="modal modal-medium">
+            <div class="modal-header">
+                <h3>Editar Perfil</h3>
+                <button class="btn-close" onclick="fecharModal('modalPerfil')">&times;</button>
+            </div>
+            <form method="post" action="{% url 'editarPerfil' %}" class="form">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Nome</label>
+                            <input type="text" name="first_name"
+                                value="{{ request.user.first_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Sobrenome</label>
+                            <input type="text" name="last_name"
+                                value="{{ request.user.last_name }}" required>
+                        </div>
+                        <div class="form-group" style="grid-column:1/-1">
+                            <label>E-mail</label>
+                            <input type="email" name="email"
+                                value="{{ request.user.email }}" required>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Telefone</label>
-                        <input type="text" id="editTelefone" value="(65) 9 9999-9999">
-                    </div>
-
-                    <div class="form-group" style="grid-column:1/-1">
-                        <label>E-mail</label>
-                        <input type="email" id="editEmail" value="gabriel@peritus.com">
-                    </div>
-
-                    <div class="form-group" style="grid-column:1/-1">
-                        <label>Cargo</label>
-                        <input type="text" id="editCargo" value="Administrador do Sistema">
-                    </div>
-
                 </div>
-
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-sm"
+                        onclick="fecharModal('modalPerfil')">Cancelar</button>
+                    <button type="submit" class="btn-primary-sm">Salvar Alterações</button>
+                </div>
             </form>
-
         </div>
-
-        <div class="modal-footer">
-            <button class="btn-secondary-sm" onclick="fecharModalPerfil()">
-                Cancelar
-            </button>
-
-            <button class="btn-primary-sm" onclick="salvarPerfil()">
-                Salvar Alterações
-            </button>
-        </div>
-
     </div>
 
-</div>
-
-<script>
-
-    function abrirModalPerfil(){
-        document.getElementById('modalPerfil').style.display = 'flex';
-    }
-
-    function fecharModalPerfil(){
-        document.getElementById('modalPerfil').style.display = 'none';
-    }
-
-    function salvarPerfil(){
-
-        const nome = document.getElementById('editNome').value;
-        const email = document.getElementById('editEmail').value;
-
-        document.querySelector('.perfil-dados h1').textContent = nome;
-
-        document.querySelector('.perfil-email').textContent = email;
-
-        document.querySelector('.info-list').innerHTML = `
-        
-            <div class="info-item">
-                <span class="info-label">Nome Completo</span>
-                <span class="info-value">${nome}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="info-label">E-mail</span>
-                <span class="info-value">${email}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="info-label">Telefone</span>
-                <span class="info-value">${document.getElementById('editTelefone').value}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="info-label">Cargo</span>
-                <span class="info-value">${document.getElementById('editCargo').value}</span>
-            </div>
-
-            <div class="info-item">
-                <span class="info-label">Localização</span>
-                <span class="info-value">Cuiabá - MT</span>
-            </div>
-        
-        `;
-
-        fecharModalPerfil();
-
-    }
-
-</script>
+    <script>
+        function abrirModal(id)  { document.getElementById(id).style.display = 'flex'; }
+        function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
 </body>
 </html>

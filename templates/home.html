@@ -1,29 +1,31 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peritus | Dashboard</title>
-    <link rel="stylesheet" href="styles/home.css">
-    <link rel="stylesheet" href="styles/dashboard.css">
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
 </head>
 <body>
     <header>
         <div class="logo">Peritus</div>
         <nav>
-            <a href="honme.html">Home</a>
-            <a href="protocolos.html">Protocolos</a>
-            <a href="documentos.html">Documentos Técnicos</a>
-            <a href="usuarios.html">Usuários</a>
-            <a href="perfil.html">Perfil</a>
+            <a href="{% url 'home' %}" class="active">Home</a>
+            <a href="{% url 'protocolos' %}">Protocolos</a>
+            <a href="{% url 'documentos' %}">Documentos Técnicos</a>
+            <a href="{% url 'usuarios' %}">Usuários</a>
+            <a href="{% url 'perfil' %}">Perfil</a>
+            <a href="{% url 'logout' %}">Sair</a>
         </nav>
     </header>
 
     <main class="dashboard">
         <div class="dash-welcome">
             <div>
-                <h1>Bem-vindo, <span id="nomeUsuario">Gabriel</span></h1>
-                <p class="dash-role">Administrador · <span id="dataHoje"></span></p>
+                <h1>Bem-vindo, {{ request.user.first_name|default:request.user.email }}</h1>
+                <p class="dash-role">{{ request.user.get_perfil_display }} · <span id="dataHoje"></span></p>
             </div>
         </div>
 
@@ -34,7 +36,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-label">Protocolos Abertos</span>
-                    <span class="stat-value">12</span>
+                    <span class="stat-value">{{ total_abertos }}</span>
                 </div>
             </div>
             <div class="stat-card">
@@ -43,7 +45,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-label">Em Trâmite</span>
-                    <span class="stat-value">7</span>
+                    <span class="stat-value">{{ total_tramite }}</span>
                 </div>
             </div>
             <div class="stat-card">
@@ -52,7 +54,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-label">Finalizados</span>
-                    <span class="stat-value">38</span>
+                    <span class="stat-value">{{ total_finalizados }}</span>
                 </div>
             </div>
             <div class="stat-card">
@@ -61,7 +63,7 @@
                 </div>
                 <div class="stat-info">
                     <span class="stat-label">Usuários Ativos</span>
-                    <span class="stat-value">5</span>
+                    <span class="stat-value">{{ total_usuarios }}</span>
                 </div>
             </div>
         </section>
@@ -70,7 +72,7 @@
             <div class="recent-table-wrapper">
                 <div class="section-header">
                     <h2>Protocolos Recentes</h2>
-                    <a href="protocolos.html" class="ver-todos">Ver todos →</a>
+                    <a href="{% url 'protocolos' %}" class="ver-todos">Ver todos →</a>
                 </div>
                 <table class="recent-table">
                     <thead>
@@ -83,52 +85,41 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for p in protocolos_recentes %}
                         <tr>
-                            <td><strong>#2026-042</strong></td>
-                            <td>João da Silva</td>
-                            <td>José da Silva</td>
-                            <td><span class="badge badge-tramite">Em Trâmite</span></td>
-                            <td>12/05/2026</td>
+                            <td><strong>#{{ p.pk }}</strong></td>
+                            <td>{{ p.solicitante.get_full_name|default:p.solicitante.email }}</td>
+                            <td>{{ p.perito.get_full_name|default:"—" }}</td>
+                            <td>
+                                {% if p.status == 'TRM' %}
+                                    <span class="badge badge-tramite">Em Trâmite</span>
+                                {% elif p.status == 'FIN' %}
+                                    <span class="badge badge-finalizado">Finalizado</span>
+                                {% else %}
+                                    <span class="badge badge-aberto">Aberto</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ p.criado_em|date:"d/m/Y" }}</td>
                         </tr>
-                        <tr>
-                            <td><strong>#2026-041</strong></td>
-                            <td>Maria Souza</td>
-                            <td>—</td>
-                            <td><span class="badge badge-aberto">Aberto</span></td>
-                            <td>11/05/2026</td>
-                        </tr>
-                        <tr>
-                            <td><strong>#2026-040</strong></td>
-                            <td>Carlos Lima</td>
-                            <td>José da Silva</td>
-                            <td><span class="badge badge-finalizado">Finalizado</span></td>
-                            <td>10/05/2026</td>
-                        </tr>
-                        <tr>
-                            <td><strong>#2026-039</strong></td>
-                            <td>Ana Paula</td>
-                            <td>José da Silva</td>
-                            <td><span class="badge badge-finalizado">Finalizado</span></td>
-                            <td>09/05/2026</td>
-                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5">Nenhum protocolo cadastrado.</td></tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
 
             <div class="quick-actions">
-                <div class="section-header">
-                    <h2>Ações Rápidas</h2>
-                </div>
+                <div class="section-header"><h2>Ações Rápidas</h2></div>
                 <div class="action-list">
-                    <a href="protocolo-novo.html" class="action-btn action-primary">
+                    <a href="{% url 'protocolo_novo' %}" class="action-btn action-primary">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                         Novo Protocolo
                     </a>
-                    <a href="documentos.html" class="action-btn action-secondary">
+                    <a href="{% url 'documentos' %}" class="action-btn action-secondary">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
                         Gerar Laudo
                     </a>
-                    <a href="usuarios.html" class="action-btn action-secondary">
+                    <a href="{% url 'usuarios' %}" class="action-btn action-secondary">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 20a6 6 0 0 1 12 0v1H3v-1z"/></svg>
                         Cadastrar Usuário
                     </a>

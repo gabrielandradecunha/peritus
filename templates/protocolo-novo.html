@@ -1,42 +1,49 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peritus | Novo Protocolo</title>
-    <link rel="stylesheet" href="styles/home.css">
-    <link rel="stylesheet" href="styles/dashboard.css">
-    <link rel="stylesheet" href="styles/form.css">
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'form.css' %}">
 </head>
 <body>
     <header>
         <div class="logo">Peritus</div>
         <nav>
-            <a href="protocolos.html" class="active">Protocolos</a>
-            <a href="documentos.html">Documentos Técnicos</a>
-            <a href="usuarios.html">Usuários</a>
-            <a href="perfil.html">Perfil</a>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'protocolos' %}" class="active">Protocolos</a>
+            <a href="{% url 'documentos' %}">Documentos Técnicos</a>
+            <a href="{% url 'usuarios' %}">Usuários</a>
+            <a href="{% url 'perfil' %}">Perfil</a>
+            <a href="{% url 'logout' %}">Sair</a>
         </nav>
     </header>
 
     <main class="dashboard">
         <div class="page-header">
             <div>
-                <a href="protocolos.html" class="breadcrumb">← Protocolos</a>
+                <a href="{% url 'protocolos' %}" class="breadcrumb">← Protocolos</a>
                 <h1>Novo Protocolo de Perícia</h1>
             </div>
         </div>
 
         <div class="form-card">
-            <div id="formAlert" class="alert" style="display:none"></div>
+            {% if erro %}
+            <div class="alert alert-error">{{ erro }}</div>
+            {% endif %}
 
-            <form id="formProtocolo" class="form" novalidate>
+            <form method="post" class="form">
+                {% csrf_token %}
+
                 <div class="form-section">
                     <h3 class="form-section-title">Identificação</h3>
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label for="tipoPericia">Tipo de Perícia <span class="req">*</span></label>
-                            <select id="tipoPericia" name="tipoPericia" required>
+                            <label for="titulo">Tipo de Perícia <span class="req">*</span></label>
+                            <select id="titulo" name="titulo" required>
                                 <option value="">Selecione o tipo</option>
                                 <option>Análise Documental</option>
                                 <option>Análise Grafoscópica</option>
@@ -45,7 +52,6 @@
                                 <option>Exame de Local de Incêndio</option>
                                 <option>Outros</option>
                             </select>
-                            <span class="field-error" id="tipoErr"></span>
                         </div>
                         <div class="form-group">
                             <label for="prioridade">Prioridade <span class="req">*</span></label>
@@ -55,14 +61,12 @@
                                 <option value="urgente">Urgente</option>
                                 <option value="muito_urgente">Muito Urgente</option>
                             </select>
-                            <span class="field-error" id="priorErr"></span>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label for="descricao">Descrição / Objeto da Perícia <span class="req">*</span></label>
-                        <textarea id="descricao" name="descricao" rows="4" placeholder="Descreva detalhadamente o objeto e a finalidade da perícia solicitada..." required></textarea>
-                        <span class="field-error" id="descErr"></span>
+                        <textarea id="descricao" name="descricao" rows="4"
+                            placeholder="Descreva detalhadamente o objeto e a finalidade da perícia solicitada..." required></textarea>
                     </div>
                 </div>
 
@@ -70,9 +74,8 @@
                     <h3 class="form-section-title">Solicitante</h3>
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label for="solicitante">Nome do Solicitante <span class="req">*</span></label>
-                            <input type="text" id="solicitante" name="solicitante" placeholder="Nome completo" required>
-                            <span class="field-error" id="solErr"></span>
+                            <label>Nome do Solicitante</label>
+                            <input type="text" value="{{ request.user.get_full_name|default:request.user.email }}" disabled>
                         </div>
                         <div class="form-group">
                             <label for="orgao">Órgão / Instituição</label>
@@ -84,7 +87,8 @@
                         </div>
                         <div class="form-group">
                             <label for="emailSol">E-mail</label>
-                            <input type="email" id="emailSol" name="emailSol" placeholder="email@orgao.gov.br">
+                            <input type="email" id="emailSol" name="emailSol"
+                                value="{{ request.user.email }}" placeholder="email@orgao.gov.br">
                         </div>
                     </div>
                 </div>
@@ -94,10 +98,11 @@
                     <div class="form-grid-2">
                         <div class="form-group">
                             <label for="perito">Perito Responsável</label>
-                            <select id="perito" name="perito">
+                            <select id="perito" name="perito_id">
                                 <option value="">Atribuir depois</option>
-                                <option value="jose">José da Silva</option>
-                                <option value="ana">Ana Pereira</option>
+                                {% for perito in peritos %}
+                                <option value="{{ perito.pk }}">{{ perito.get_full_name|default:perito.email }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="form-group">
@@ -111,12 +116,13 @@
                     <h3 class="form-section-title">Observações</h3>
                     <div class="form-group">
                         <label for="obs">Observações Adicionais</label>
-                        <textarea id="obs" name="obs" rows="3" placeholder="Informações complementares relevantes para a realização da perícia..."></textarea>
+                        <textarea id="obs" name="obs" rows="3"
+                            placeholder="Informações complementares relevantes para a realização da perícia..."></textarea>
                     </div>
                 </div>
 
                 <div class="form-actions">
-                    <a href="protocolos.html" class="btn-cancel">Cancelar</a>
+                    <a href="{% url 'protocolos' %}" class="btn-cancel">Cancelar</a>
                     <button type="submit" class="btn-primary">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
                         Abrir Protocolo
@@ -127,27 +133,6 @@
     </main>
 
     <script>
-        document.getElementById('formProtocolo').addEventListener('submit', function(e) {
-            e.preventDefault();
-            let valid = true;
-
-            ['tipoPericia','prioridade','descricao','solicitante'].forEach(id => {
-                const el = document.getElementById(id);
-                const errId = {tipoPericia:'tipoErr', prioridade:'priorErr', descricao:'descErr', solicitante:'solErr'}[id];
-                const err = document.getElementById(errId);
-                if (!el.value.trim()) { err.textContent = 'Campo obrigatório.'; valid = false; }
-                else err.textContent = '';
-            });
-
-            if (!valid) return;
-
-            const alert = document.getElementById('formAlert');
-            alert.className = 'alert alert-success';
-            alert.textContent = '✓ Protocolo aberto com sucesso! Redirecionando...';
-            alert.style.display = 'block';
-            setTimeout(() => window.location.href = 'protocolos.html', 1800);
-        });
-
         document.getElementById('contato').addEventListener('input', function() {
             let v = this.value.replace(/\D/g,'');
             if (v.length <= 11) v = v.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, '($1) $2 $3-$4');

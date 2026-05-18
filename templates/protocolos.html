@@ -1,22 +1,24 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peritus | Protocolos</title>
-    <link rel="stylesheet" href="styles/home.css">
-    <link rel="stylesheet" href="styles/dashboard.css">
-    <link rel="stylesheet" href="styles/table.css">
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'table.css' %}">
 </head>
 <body>
     <header>
         <div class="logo">Peritus</div>
         <nav>
-            <a href="home.html">Home</a>
-            <a href="protocolos.html" class="active">Protocolos</a>
-            <a href="documentos.html">Documentos Técnicos</a>
-            <a href="usuarios.html">Usuários</a>
-            <a href="perfil.html">Perfil</a>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'protocolos' %}" class="active">Protocolos</a>
+            <a href="{% url 'documentos' %}">Documentos Técnicos</a>
+            <a href="{% url 'usuarios' %}">Usuários</a>
+            <a href="{% url 'perfil' %}">Perfil</a>
+            <a href="{% url 'logout' %}">Sair</a>
         </nav>
     </header>
 
@@ -26,13 +28,12 @@
                 <h1>Protocolos</h1>
                 <p class="page-sub">Acompanhe e gerencie todos os protocolos de perícia</p>
             </div>
-            <a href="protocolo-novo.html" class="btn-primary">
+            <a href="{% url 'protocolo_novo' %}" class="btn-primary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 Novo Protocolo
             </a>
         </div>
 
-        <!-- Filtros -->
         <div class="filters-bar">
             <div class="search-wrapper">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -40,9 +41,9 @@
             </div>
             <select id="filtroStatus" onchange="filtrar()">
                 <option value="">Todos os status</option>
-                <option value="Aberto">Aberto</option>
-                <option value="Em Trâmite">Em Trâmite</option>
-                <option value="Finalizado">Finalizado</option>
+                <option value="ABT">Aberto</option>
+                <option value="TRM">Em Trâmite</option>
+                <option value="FIN">Finalizado</option>
             </select>
         </div>
 
@@ -60,6 +61,38 @@
                     </tr>
                 </thead>
                 <tbody id="tbodyProtocolos">
+                    {% for p in protocolos %}
+                    <tr data-num="{{ p.pk }}"
+                        data-solicitante="{{ p.solicitante.get_full_name|default:p.solicitante.email|lower }}"
+                        data-perito="{{ p.perito.get_full_name|default:'—'|lower }}"
+                        data-status="{{ p.status }}">
+                        <td><strong>#{{ p.pk }}</strong></td>
+                        <td>{{ p.titulo }}</td>
+                        <td>{{ p.solicitante.get_full_name|default:p.solicitante.email }}</td>
+                        <td>{{ p.perito.get_full_name|default:"—" }}</td>
+                        <td>
+                            {% if p.status == 'ABT' %}<span class="badge badge-aberto">Aberto</span>
+                            {% elif p.status == 'TRM' %}<span class="badge badge-tramite">Em Trâmite</span>
+                            {% else %}<span class="badge badge-finalizado">Finalizado</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ p.criado_em|date:"d/m/Y" }}</td>
+                        <td class="actions-cell">
+                            {% if p.status != 'FIN' %}
+                            <button class="btn-action btn-atribuir"
+                                    onclick="abrirAtribuir({{ p.pk }}, '#{{ p.pk }}')"
+                                    title="Atribuir Perito">Atribuir</button>
+                            {% endif %}
+                            {% if p.status == 'TRM' %}
+                            <button class="btn-action btn-finalizar"
+                                    onclick="abrirFinalizar({{ p.pk }}, '#{{ p.pk }}')"
+                                    title="Finalizar">Finalizar</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" style="text-align:center">Nenhum protocolo cadastrado.</td></tr>
+                    {% endfor %}
                 </tbody>
             </table>
             <div id="emptyState" class="empty-state" style="display:none">
@@ -76,21 +109,26 @@
                 <h3>Atribuir Perito</h3>
                 <button onclick="fecharModal('modalAtribuir')" class="btn-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <p>Selecione o perito responsável pelo protocolo <strong id="modalProtNum"></strong>:</p>
-                <div class="form-group" style="margin-top:1rem">
-                    <label>Perito</label>
-                    <select id="selectPerito" class="full-select">
-                        <option value="">-- Selecione --</option>
-                        <option value="José da Silva">José da Silva</option>
-                        <option value="Ana Pereira">Ana Pereira</option>
-                    </select>
+            <form method="post" action="{% url 'atribuir_perito' %}">
+                {% csrf_token %}
+                <input type="hidden" name="protocolo_id" id="atribuirProtocoloId">
+                <div class="modal-body">
+                    <p>Selecione o perito responsável pelo protocolo <strong id="modalProtNum"></strong>:</p>
+                    <div class="form-group" style="margin-top:1rem">
+                        <label>Perito</label>
+                        <select name="perito_id" id="selectPerito" class="full-select">
+                            <option value="">-- Selecione --</option>
+                            {% for perito in peritos %}
+                            <option value="{{ perito.pk }}">{{ perito.get_full_name|default:perito.email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button onclick="fecharModal('modalAtribuir')" class="btn-secondary-sm">Cancelar</button>
-                <button onclick="confirmarAtribuicao()" class="btn-primary-sm">Confirmar</button>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="fecharModal('modalAtribuir')" class="btn-secondary-sm">Cancelar</button>
+                    <button type="submit" class="btn-primary-sm">Confirmar</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -101,98 +139,55 @@
                 <h3>Finalizar Protocolo</h3>
                 <button onclick="fecharModal('modalFinalizar')" class="btn-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja finalizar o protocolo <strong id="modalFinalizarNum"></strong>?</p>
-                <p style="color:#666; margin-top:.5rem; font-size:.9rem">Esta ação irá vincular o laudo técnico e encerrar o protocolo.</p>
-            </div>
-            <div class="modal-footer">
-                <button onclick="fecharModal('modalFinalizar')" class="btn-secondary-sm">Cancelar</button>
-                <button onclick="confirmarFinalizacao()" class="btn-danger-sm">Finalizar</button>
-            </div>
+            <form method="post" action="{% url 'finalizar_protocolo' %}">
+                {% csrf_token %}
+                <input type="hidden" name="protocolo_id" id="finalizarProtocoloId">
+                <div class="modal-body">
+                    <p>Tem certeza que deseja finalizar o protocolo <strong id="modalFinalizarNum"></strong>?</p>
+                    <p style="color:#666; margin-top:.5rem; font-size:.9rem">Esta ação irá encerrar o protocolo.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="fecharModal('modalFinalizar')" class="btn-secondary-sm">Cancelar</button>
+                    <button type="submit" class="btn-danger-sm">Finalizar</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        let protocolos = [
-            { num: '#2026-042', desc: 'Análise de documento suspeito', solicitante: 'João da Silva', perito: 'José da Silva', status: 'Em Trâmite', data: '12/05/2026' },
-            { num: '#2026-041', desc: 'Perícia em equipamento eletrônico', solicitante: 'Maria Souza', perito: '—', status: 'Aberto', data: '11/05/2026' },
-            { num: '#2026-040', desc: 'Análise grafoscópica', solicitante: 'Carlos Lima', perito: 'José da Silva', status: 'Finalizado', data: '10/05/2026' },
-            { num: '#2026-039', desc: 'Exame de local de incêndio', solicitante: 'Ana Paula', perito: 'José da Silva', status: 'Finalizado', data: '09/05/2026' },
-            { num: '#2026-038', desc: 'Análise balística', solicitante: 'Roberto Costa', perito: '—', status: 'Aberto', data: '07/05/2026' },
-        ];
-
-        let protocoloSelecionado = null;
-
-        function badgeClass(status) {
-            if (status === 'Aberto') return 'badge-aberto';
-            if (status === 'Em Trâmite') return 'badge-tramite';
-            return 'badge-finalizado';
-        }
-
-        function renderizar(lista) {
-            const tbody = document.getElementById('tbodyProtocolos');
-            const empty = document.getElementById('emptyState');
-            tbody.innerHTML = '';
-            if (!lista.length) { empty.style.display = 'flex'; return; }
-            empty.style.display = 'none';
-            lista.forEach((p, i) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${p.num}</strong></td>
-                    <td>${p.desc}</td>
-                    <td>${p.solicitante}</td>
-                    <td>${p.perito}</td>
-                    <td><span class="badge ${badgeClass(p.status)}">${p.status}</span></td>
-                    <td>${p.data}</td>
-                    <td class="actions-cell">
-                        ${p.status !== 'Finalizado' ? `<button class="btn-action btn-atribuir" onclick="abrirAtribuir(${i})" title="Atribuir Perito">Atribuir</button>` : ''}
-                        ${p.status === 'Em Trâmite' ? `<button class="btn-action btn-finalizar" onclick="abrirFinalizar(${i})" title="Finalizar">Finalizar</button>` : ''}
-                        <a href="protocolo-detalhe.html" class="btn-action btn-ver" title="Ver detalhes">Ver</a>
-                    </td>`;
-                tbody.appendChild(tr);
-            });
-        }
-
         function filtrar() {
             const busca = document.getElementById('searchInput').value.toLowerCase();
             const status = document.getElementById('filtroStatus').value;
-            const filtrado = protocolos.filter(p =>
-                (p.num.toLowerCase().includes(busca) || p.solicitante.toLowerCase().includes(busca) || p.perito.toLowerCase().includes(busca)) &&
-                (!status || p.status === status)
-            );
-            renderizar(filtrado);
+            const rows = document.querySelectorAll('#tbodyProtocolos tr[data-num]');
+            let visiveis = 0;
+            rows.forEach(row => {
+                const sol  = row.dataset.solicitante || '';
+                const per  = row.dataset.perito || '';
+                const num  = row.dataset.num || '';
+                const st   = row.dataset.status || '';
+                const ok = (num.includes(busca) || sol.includes(busca) || per.includes(busca))
+                        && (!status || st === status);
+                row.style.display = ok ? '' : 'none';
+                if (ok) visiveis++;
+            });
+            document.getElementById('emptyState').style.display = visiveis === 0 ? 'flex' : 'none';
         }
 
-        function abrirAtribuir(i) {
-            protocoloSelecionado = i;
-            document.getElementById('modalProtNum').textContent = protocolos[i].num;
+        function abrirAtribuir(id, num) {
+            document.getElementById('atribuirProtocoloId').value = id;
+            document.getElementById('modalProtNum').textContent = num;
             document.getElementById('modalAtribuir').style.display = 'flex';
         }
 
-        function abrirFinalizar(i) {
-            protocoloSelecionado = i;
-            document.getElementById('modalFinalizarNum').textContent = protocolos[i].num;
+        function abrirFinalizar(id, num) {
+            document.getElementById('finalizarProtocoloId').value = id;
+            document.getElementById('modalFinalizarNum').textContent = num;
             document.getElementById('modalFinalizar').style.display = 'flex';
         }
 
-        function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        function confirmarAtribuicao() {
-            const perito = document.getElementById('selectPerito').value;
-            if (!perito) return alert('Selecione um perito.');
-            protocolos[protocoloSelecionado].perito = perito;
-            protocolos[protocoloSelecionado].status = 'Em Trâmite';
-            fecharModal('modalAtribuir');
-            renderizar(protocolos);
+        function fecharModal(id) {
+            document.getElementById(id).style.display = 'none';
         }
-
-        function confirmarFinalizacao() {
-            protocolos[protocoloSelecionado].status = 'Finalizado';
-            fecharModal('modalFinalizar');
-            renderizar(protocolos);
-        }
-
-        renderizar(protocolos);
     </script>
 </body>
 </html>
